@@ -1,0 +1,2 @@
+default_image_path: "/home/ubuntu/debian-11-linux-5.18.img"
+ovmf_path: "/home/ubuntu/git/odesenfans/trustless-computing-experiments/sev/ovmf/downloads/edk2/Build/AmdSev/RELEASE_GCC5/FV/OVMF.fd"
