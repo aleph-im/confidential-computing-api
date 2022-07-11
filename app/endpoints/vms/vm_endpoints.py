@@ -193,7 +193,7 @@ async def get_vm_measure(
     return {"vm": vm, "sev_info": vm_sev_info, "launch_measure": launch_measure}
 
 
-@router.post("/vm/{vm_id}/sev/inject-secrets", response_model=VmSchema)
+@router.post("/vm/{vm_id}/sev/inject-secret", response_model=VmSchema)
 async def inject_vm_secrets(
     vm_id: str,
     packet_header: str,
@@ -206,7 +206,7 @@ async def inject_vm_secrets(
     if vm.state != VmState.STARTED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Cannot inject secrets in a VM in state '{vm.state}'.",
+            detail=f"Cannot inject secret in a VM in state '{vm.state}'.",
         )
 
     with QemuVmClient(vm) as vm_client:
