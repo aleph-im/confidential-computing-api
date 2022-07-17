@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     # ovmf_path: FilePath
     # default_image_path: FilePath
 
+    vm_default_memory: int = 4096
+    vm_default_number_of_cores: int = 1
+    vm_max_memory: int = 16 * 1024
+    vm_min_memory: int = 128
+    vm_max_number_of_cores: int = 4
+
     ovmf_path: Path
     default_image_path: Path
 

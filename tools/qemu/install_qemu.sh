@@ -16,9 +16,9 @@ mkdir -p "${DOWNLOAD_DIR}"
 
 # Install dependencies
 sudo apt-get update && \
-  apt-get install -y build-essential zlib1g-dev pkg-config libglib2.0-dev binutils-dev libboost-all-dev \
-                     autoconf libtool libssl-dev libpixman-1-dev libpython-dev python-pip python-capstone virtualenv \
-                     ninja-build
+  sudo apt-get install -y \
+    build-essential zlib1g-dev pkg-config libglib2.0-dev binutils-dev libboost-all-dev autoconf libtool \
+    libssl-dev libpixman-1-dev libpython3-dev python3-pip python-capstone virtualenv ninja-build
 
 wget -O "${DOWNLOAD_DIR}/${QEMU_TARBALL}" "https://download.qemu.org/qemu-7.0.0.tar.xz"
 tar -xvJf "${DOWNLOAD_DIR}/${QEMU_TARBALL}" --directory "${DOWNLOAD_DIR}"

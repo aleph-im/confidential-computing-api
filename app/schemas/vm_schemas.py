@@ -24,6 +24,9 @@ class VmSchema(BaseModel):
 
     id: str
     state: VmState
+    memory: int
+    number_of_cores: int
+    sev_policy: Optional[str]
     creation_datetime: dt.datetime
     image: Optional[VmImageSchema]
     ssh_port: Optional[int]

@@ -6,7 +6,7 @@ from uuid import uuid4
 from zipfile import ZipFile
 
 import aiofile
-from fastapi import Depends, File, HTTPException, UploadFile, status
+from fastapi import Depends, File, HTTPException, UploadFile, status, Query
 from sqlalchemy.orm import Session
 
 from authentication import get_current_username
@@ -51,10 +51,28 @@ async def fetch_vm_and_check_ownership(
 
 @router.post("/vm", response_model=VmSchema)
 async def create_vm(
+    memory: int = Query(
+        default=settings.vm_default_memory,
+        title="RAM allocated to the VM, in MB",
+        gt=settings.vm_min_memory,
+        lt=settings.vm_max_memory,
+    ),
+    number_of_cores: int = Query(
+        default=settings.vm_default_number_of_cores,
+        title="Number of cores for the VM",
+        gt=0,
+        lt=settings.vm_max_number_of_cores,
+    ),
     session: Session = Depends(get_db_session),
     username: str = Depends(get_current_username),
 ):
-    vm = Vm(id=uuid4().hex, state=VmState.NEW, owner=username)
+    vm = Vm(
+        id=uuid4().hex,
+        state=VmState.NEW,
+        memory=memory,
+        number_of_cores=number_of_cores,
+        owner=username,
+    )
     session.add(vm)
     # Let the DB set the creation datetime field
     await session.flush()
@@ -142,9 +160,20 @@ async def upload_guest_owner_certificates(
             b64_fh.write(base64_content)
 
 
+def validate_sev_policy(sev_policy_str: str) -> None:
+    try:
+        _policy = int(sev_policy_str, base=16)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid SEV policy: policy is not a hexadecimal number",
+        )
+
+
 @router.post("/vm/{vm_id}/start", response_model=VmSchema)
 async def start_vm(
     vm_id: str,
+    sev_policy: str = Query(..., title="SEV policy (hexadecimal format)"),
     session: Session = Depends(get_db_session),
     username: str = Depends(get_current_username),
 ):
@@ -155,6 +184,9 @@ async def start_vm(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"VM is already started. Current state: '{vm.state}'.",
         )
+
+    validate_sev_policy(sev_policy)
+    vm.sev_policy = sev_policy
 
     vm_dir = get_vm_dir(vm)
 
