@@ -7,8 +7,6 @@ import qmp
 from models.vm import Vm, VmState
 from toolkit.network import find_available_port
 
-DEFAULT_IMAGE_PATH = "/home/ubuntu/debian-11-linux-5.18.img"
-
 
 @dataclass
 class VmSevInfo:
