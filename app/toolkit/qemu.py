@@ -98,6 +98,8 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
     # TODO: this should be called only once, and we should have a generic abstraction
     #       to support SEV + TDX. This will do for now.
     sev_info = secure_encryption_info()
+    if sev_info is None:
+        raise ValueError("Not running on an AMD SEV platform?")
 
     p = subprocess.Popen(
         [
