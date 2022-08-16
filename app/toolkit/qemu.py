@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import qmp
+from cpuid.features import secure_encryption_info
 
 from models.vm import Vm, VmState
 from toolkit.network import find_available_port
@@ -94,6 +95,12 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
     if not (godh.is_file() and launch_blob.is_file()):
         raise FileNotFoundError("Missing guest owner certificates, cannot start the VM.")
 
+    # TODO: this should be called only once, and we should have a generic abstraction
+    #       to support SEV + TDX. This will do for now.
+    sev_info = secure_encryption_info()
+    if sev_info is None:
+        raise ValueError("Not running on an AMD SEV platform?")
+
     p = subprocess.Popen(
         [
             "qemu-system-x86_64",
@@ -116,7 +123,9 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
             "-device",
             "virtio-net-pci,netdev=net0",
             "-object",
-            f"sev-guest,id=sev0,policy={vm.sev_policy},cbitpos=51,reduced-phys-bits=5,dh-cert-file=godh-b64.txt,session-file=launch_blob-b64.txt",
+            f"sev-guest,id=sev0,policy={vm.sev_policy},cbitpos={sev_info.cbitpos},"
+            f"reduced-phys-bits={sev_info.reduced_phys_bits},"
+            "dh-cert-file=godh-b64.txt,session-file=launch_blob-b64.txt",
             "-machine",
             "confidential-guest-support=sev0",
             "-qmp",

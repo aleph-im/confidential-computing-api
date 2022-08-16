@@ -2,6 +2,7 @@ aiofile==3.7.4
 aiosqlite==0.17.0
 fastapi==0.78.0
 pycrypto==2.6.1
+python-cpuid==0.1.0
 python-multipart==0.0.5
 pyyaml==6.0
 qmp==0.0.1
