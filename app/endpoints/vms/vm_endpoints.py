@@ -68,7 +68,7 @@ async def create_vm(
 ):
     vm = Vm(
         id=uuid4().hex,
-        state=VmState.NEW,
+        state=VmState.STOPPED,
         memory=memory,
         number_of_cores=number_of_cores,
         owner=username,
@@ -136,7 +136,7 @@ async def upload_guest_owner_certificates(
 ):
     vm = await fetch_vm_and_check_ownership(session, vm_id, username)
 
-    if vm.state != VmState.NEW:
+    if vm.state != VmState.STOPPED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"VM is already started. Current state: '{vm.state}'.",
@@ -179,7 +179,7 @@ async def start_vm(
 ):
     vm = await fetch_vm_and_check_ownership(session, vm_id, username)
 
-    if vm.state != VmState.NEW:
+    if vm.state != VmState.STOPPED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"VM is already started. Current state: '{vm.state}'.",
