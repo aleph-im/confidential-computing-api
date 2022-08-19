@@ -9,8 +9,9 @@ import aiofile
 from fastapi import Depends, File, HTTPException, UploadFile, status, Query
 from sqlalchemy.orm import Session
 
-from authentication import get_current_username
+from authentication import get_current_user
 from models.db import get_db_session
+from models.users import User
 from models.vm import Vm, VmImage, VmState, fetch_vm
 from schemas.vm_schemas import VmSchema, VmImagePostSchema, VmStartResponseSchema
 from settings import settings
@@ -37,11 +38,9 @@ async def write_uploaded_file(download_dir: Path, file: UploadFile) -> Path:
     return file_path
 
 
-async def fetch_vm_and_check_ownership(
-    session: Session, vm_id: str, username: str
-) -> Vm:
+async def fetch_vm_and_check_ownership(session: Session, vm_id: str, user: User) -> Vm:
     vm = await fetch_vm(session, vm_id)
-    if vm is None or vm.owner != username:
+    if vm is None or vm.owner != user.username:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="VM not found"
         )
@@ -64,14 +63,14 @@ async def create_vm(
         lt=settings.vm_max_number_of_cores,
     ),
     session: Session = Depends(get_db_session),
-    username: str = Depends(get_current_username),
+    user: User = Depends(get_current_user),
 ):
     vm = Vm(
         id=uuid4().hex,
         state=VmState.STOPPED,
         memory=memory,
         number_of_cores=number_of_cores,
-        owner=username,
+        owner=user.username,
     )
     session.add(vm)
     # Let the DB set the creation datetime field
@@ -83,13 +82,9 @@ async def create_vm(
 async def get_vm(
     vm_id: str,
     session: Session = Depends(get_db_session),
-    username: str = Depends(get_current_username),
+    user: User = Depends(get_current_user),
 ):
-    vm = await fetch_vm_and_check_ownership(session, vm_id, username)
-    if vm is None or vm.owner != username:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="VM not found"
-        )
+    vm = await fetch_vm_and_check_ownership(session, vm_id, user)
     return vm
 
 
@@ -99,13 +94,9 @@ async def upload_vm_image(
     image_name: str,
     vm_image_tarball: UploadFile = File(...),
     session: Session = Depends(get_db_session),
-    username: str = Depends(get_current_username),
+    user: User = Depends(get_current_user),
 ):
-    vm = await fetch_vm_and_check_ownership(session, vm_id, username)
-    if vm is None or vm.owner != username:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="VM not found"
-        )
+    vm = await fetch_vm_and_check_ownership(session, vm_id, user)
 
     vm_download_dir = get_vm_dir(vm)
     vm_download_dir.mkdir(parents=True, exist_ok=True)
@@ -132,9 +123,9 @@ async def upload_guest_owner_certificates(
     vm_id: str,
     guest_owner_certificates: UploadFile = File(...),
     session: Session = Depends(get_db_session),
-    username: str = Depends(get_current_username),
+    user: User = Depends(get_current_user),
 ):
-    vm = await fetch_vm_and_check_ownership(session, vm_id, username)
+    vm = await fetch_vm_and_check_ownership(session, vm_id, user)
 
     if vm.state != VmState.STOPPED:
         raise HTTPException(
@@ -175,9 +166,9 @@ async def start_vm(
     vm_id: str,
     sev_policy: str = Query(..., title="SEV policy (hexadecimal format)"),
     session: Session = Depends(get_db_session),
-    username: str = Depends(get_current_username),
+    user: User = Depends(get_current_user),
 ):
-    vm = await fetch_vm_and_check_ownership(session, vm_id, username)
+    vm = await fetch_vm_and_check_ownership(session, vm_id, user)
 
     if vm.state != VmState.STOPPED:
         raise HTTPException(
@@ -209,9 +200,9 @@ async def start_vm(
 async def get_vm_measure(
     vm_id: str,
     session: Session = Depends(get_db_session),
-    username: str = Depends(get_current_username),
+    user: User = Depends(get_current_user),
 ):
-    vm = await fetch_vm_and_check_ownership(session, vm_id, username)
+    vm = await fetch_vm_and_check_ownership(session, vm_id, user)
     if vm.state != VmState.STARTED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -231,9 +222,9 @@ async def inject_vm_secrets(
     packet_header: str,
     secret: str,
     session: Session = Depends(get_db_session),
-    username: str = Depends(get_current_username),
+    user: User = Depends(get_current_user),
 ):
-    vm = await fetch_vm_and_check_ownership(session, vm_id, username)
+    vm = await fetch_vm_and_check_ownership(session, vm_id, user)
 
     if vm.state != VmState.STARTED:
         raise HTTPException(
