@@ -10,7 +10,7 @@ from .db import Base
 
 class VmState(str, Enum):
     # The VM was created but not yet started
-    NEW = "new"
+    STOPPED = "stopped"
     # The VM was created in Qemu but still needs to go through the SEV launch process
     STARTED = "started"
     # The VM is running and can be used by the user
