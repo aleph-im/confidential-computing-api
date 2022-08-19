@@ -130,6 +130,7 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
             "confidential-guest-support=sev0",
             "-qmp",
             f"tcp:localhost:{qmp_port},server=on,wait=off",
+            "--no-reboot",  # Rebooting from inside the VM shuts down the machine
             "-S",
         ],
         cwd=working_dir,
