@@ -46,7 +46,7 @@ pip install -r requirements.txt
 alembic upgrade head
 
 # Start the API
-python app/api
+python app/api.py
 ```
 
 ## VM lifecycle
