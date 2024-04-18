@@ -15,6 +15,25 @@ and launch VMs.
 To install Qemu, run `tools/qemu/install_qemu.sh`. It will install a stable version
 ready for use with the CRN.
 
+### System setup
+
+Install Libvirt
+```shell
+sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+```
+
+Optional: Install `virtinst`
+```shell
+sudo apt install virtinst
+```
+
+Install requirements for Python libraries
+```
+sudo apt install python3-venv
+# For `python-cpuid`
+sudo apt install python3-dev build-essential
+```
+
 ## Launching the API
 
 ```shell
