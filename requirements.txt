@@ -3,7 +3,6 @@ aiosqlite==0.17.0
 alembic==1.8.1
 fastapi==0.78.0
 passlib[bcrypt]==1.7.4
-pycrypto==2.6.1
 python-cpuid==0.1.0
 python-multipart==0.0.5
 pyyaml==6.0
