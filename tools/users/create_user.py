@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models.users import User
+from app.models.users import User
 
 
 def cli_parse() -> argparse.Namespace:
