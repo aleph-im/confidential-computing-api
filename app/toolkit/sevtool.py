@@ -52,7 +52,7 @@ class SevClient:
     def __init__(self, sev_dir: Path):
         self.sev_dir = sev_dir
         self.certificates_dir = sev_dir / "platform"
-        self.certificates_archive = self.certificates_dir / "certs_export.cer"
+        self.certificates_archive = self.certificates_dir / "certs_export.cert"
 
         self.certificates_dir.mkdir(exist_ok=True, parents=True)
 
