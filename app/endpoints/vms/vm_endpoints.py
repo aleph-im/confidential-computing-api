@@ -19,7 +19,7 @@ from toolkit.qemu import qemu_create_vm, QemuVmClient
 from .router import router
 
 DOWNLOAD_DIR = Path(__file__).absolute().parent / "downloads"
-GUEST_OWNER_CERTIFICATE_FILES = "godh.cert", "launch_blob.bin"
+GUEST_OWNER_CERTIFICATE_FILES = "vm_godh.b64", "vm_session.b64"
 
 
 def get_vm_dir(vm: Vm) -> Path:

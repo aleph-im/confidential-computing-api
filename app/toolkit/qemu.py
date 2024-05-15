@@ -89,8 +89,9 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
     ssh_port = find_available_port()
     qmp_port = find_available_port()
 
-    godh = Path(working_dir) / "godh-b64.txt"
-    launch_blob = Path(working_dir) / "launch_blob-b64.txt"
+    godh = Path(working_dir) / "vm_godh.b64"
+    launch_blob = Path(working_dir) / "vm_session.b64"
+
 
     if not (godh.is_file() and launch_blob.is_file()):
         raise FileNotFoundError("Missing guest owner certificates, cannot start the VM.")
@@ -123,9 +124,9 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
             "-device",
             "virtio-net-pci,netdev=net0",
             "-object",
-            f"sev-guest,id=sev0,policy={vm.sev_policy},cbitpos={sev_info.cbitpos},"
-            f"reduced-phys-bits={sev_info.reduced_phys_bits},"
-            "dh-cert-file=godh-b64.txt,session-file=launch_blob-b64.txt",
+            f"sev-guest,id=sev0,policy={vm.sev_policy},cbitpos={sev_info.c_bit_position},"
+            f"reduced-phys-bits={sev_info.phys_addr_reduction},"
+            "dh-cert-file=vm_godh.b64,session-file=vm_session.b64",
             "-machine",
             "confidential-guest-support=sev0",
             "-qmp",
