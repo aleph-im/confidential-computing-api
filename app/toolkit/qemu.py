@@ -89,8 +89,8 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
     ssh_port = find_available_port()
     qmp_port = find_available_port()
 
-    godh = Path(working_dir) / "godh-b64.txt"
-    launch_blob = Path(working_dir) / "launch_blob-b64.txt"
+    godh = Path(working_dir) / "vm_godh.b64"
+    launch_blob = Path(working_dir) / "vm_session.b64"
 
     if not (godh.is_file() and launch_blob.is_file()):
         raise FileNotFoundError("Missing guest owner certificates, cannot start the VM.")
@@ -123,15 +123,23 @@ def qemu_create_vm(vm: Vm, working_dir: Path, ovmf_path: Path):
             "-device",
             "virtio-net-pci,netdev=net0",
             "-object",
-            f"sev-guest,id=sev0,policy={vm.sev_policy},cbitpos={sev_info.cbitpos},"
-            f"reduced-phys-bits={sev_info.reduced_phys_bits},"
-            "dh-cert-file=godh-b64.txt,session-file=launch_blob-b64.txt",
+            f"sev-guest,id=sev0,policy={vm.sev_policy},cbitpos={sev_info.c_bit_position},"
+            f"reduced-phys-bits={sev_info.phys_addr_reduction},"
+            "dh-cert-file=vm_godh.b64,session-file=vm_session.b64",
             "-machine",
             "confidential-guest-support=sev0",
             "-qmp",
             f"tcp:localhost:{qmp_port},server=on,wait=off",
             "--no-reboot",  # Rebooting from inside the VM shuts down the machine
             "-S",
+            # Linux kernel 6.9 added a control on the RDRAND function to ensure that the random numbers generation
+            # works well, on Qemu emulation for confidential computing the CPU model us faked and this makes control
+            # raise an error and prevent boot. Passing the argument --cpu host instruct the VM to use the same CPU
+            # model than the host thus the VM's kernel knows which method is used to get random numbers (Intel and
+            # AMD have different methods) and properly boot.
+            "-cpu",
+            "host",
+
         ],
         cwd=working_dir,
     )

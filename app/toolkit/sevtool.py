@@ -52,7 +52,7 @@ class SevClient:
     def __init__(self, sev_dir: Path):
         self.sev_dir = sev_dir
         self.certificates_dir = sev_dir / "platform"
-        self.certificates_archive = self.certificates_dir / "certs_export.zip"
+        self.certificates_archive = self.certificates_dir / "certs_export.cert"
 
         self.certificates_dir.mkdir(exist_ok=True, parents=True)
 
@@ -62,12 +62,12 @@ class SevClient:
         ofolder = output_dir if output_dir else self.sev_dir
 
         result = subprocess.run(
-            ["sevtool", "--ofolder", ofolder, *args],
-            capture_output=True,
+            ["sevctl", *args],
+            capture_output=False,
             text=True,
         )
 
-        check_command_result(result)
+        #check_command_result(result)
         return result
 
     def get_platform_status(self) -> SevPlatformStatus:
@@ -84,4 +84,4 @@ class SevClient:
         return SevPlatformStatus.from_dict(sev_platform_status)
 
     def export_certificates(self):
-        _ = self.sevtool_cmd("--export_cert_chain", output_dir=self.certificates_dir)
+        _ = self.sevtool_cmd("export", self.certificates_archive)
