@@ -9,7 +9,7 @@ and launch VMs.
 ## Requirements
 
 * The platform must support SEV.
-* SEV Tool must be installed and available in the PATH of the platform.
+* sevctl must be installed and available in the PATH of the platform. (see bellow)
 * QEMU must be installed.
 
 To install Qemu, run `tools/qemu/install_qemu.sh`. It will install a stable version
@@ -33,6 +33,21 @@ sudo apt install python3-venv
 # For `python-cpuid`
 sudo apt install python3-dev build-essential
 ```
+
+#### Install `sevctl`
+
+Requirements:
+ * `cargo`
+
+On Ubuntu/ Debian install it via `apt install cargo` (as root)
+
+To build and install sevctl
+```cargo install  sevctl```
+
+Ensure $HOME/.cargo/bin is in your PATH
+
+Alternatively you can build it from git : ```cargo install  --git  https://github.com/virtee/sevctl```
+
 
 ## Launching the API
 
