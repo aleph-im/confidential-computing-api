@@ -84,4 +84,4 @@ class SevClient:
         return SevPlatformStatus.from_dict(sev_platform_status)
 
     def export_certificates(self):
-        _ = self.sevtool_cmd("export", "--full", self.certificates_archive)
+        _ = self.sevtool_cmd("export", self.certificates_archive)
