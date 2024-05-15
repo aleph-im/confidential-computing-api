@@ -9,7 +9,7 @@ and launch VMs.
 ## Requirements
 
 * The platform must support SEV.
-* sevctl must be installed and available in the PATH of the platform. (see bellow)
+* sevctl must be installed and available in the PATH of the platform. (see below)
 * QEMU must be installed.
 
 To install Qemu, run `tools/qemu/install_qemu.sh`. It will install a stable version
