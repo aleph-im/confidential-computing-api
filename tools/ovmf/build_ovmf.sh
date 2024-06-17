@@ -31,6 +31,5 @@ make
 make install
 
 # Build OVMF
-
 cd $EDK2_DIR
 OvmfPkg/build.sh -b RELEASE -p OvmfPkg/AmdSev/AmdSevX64.dsc
